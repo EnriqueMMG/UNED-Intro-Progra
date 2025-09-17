@@ -1,0 +1,278 @@
+#include <iostream>
+#include <iomanip>
+#include <string>
+#include <ctime>
+using namespace std;
+
+// Constantes globales
+const int MAX_CLIENTES = 5;
+const int MAX_TRANSACCIONES = 5;
+const int MAX_INTENTOS_PIN = 3;
+const double SALDO_INICIAL = 150000.00;
+
+// PINs válidos para los 5 clientes
+const int PINES_VALIDOS[MAX_CLIENTES] = {1234, 2345, 3456, 4567, 5678};
+
+// Variables globales para el cliente actual
+int clienteActual = -1;
+double saldos[MAX_CLIENTES];
+int contadorTransacciones[MAX_CLIENTES];
+
+// Arrays para historial de transacciones
+string tiposTransaccion[MAX_CLIENTES][MAX_TRANSACCIONES];
+double montosTransaccion[MAX_CLIENTES][MAX_TRANSACCIONES];
+double saldosDespues[MAX_CLIENTES][MAX_TRANSACCIONES];
+string fechasTransaccion[MAX_CLIENTES][MAX_TRANSACCIONES];
+
+// Función para inicializar datos de clientes
+void inicializarDatos() {
+    for(int i = 0; i < MAX_CLIENTES; i++) {
+        saldos[i] = SALDO_INICIAL;
+        contadorTransacciones[i] = 0;
+    }
+}
+
+// Función para obtener fecha actual
+string obtenerFechaActual() {
+    time_t ahora = time(0);
+    tm* tiempoLocal = localtime(&ahora);
+    
+    string dia = to_string(tiempoLocal->tm_mday);
+    string mes = to_string(tiempoLocal->tm_mon + 1);
+    string anio = to_string(tiempoLocal->tm_year + 1900);
+    
+    if(dia.length() == 1) dia = "0" + dia;
+    if(mes.length() == 1) mes = "0" + mes;
+    
+    return dia + "/" + mes + "/" + anio;
+}
+
+// Función para validar PIN
+int validarPIN() {
+    int pin, intentos = 0;
+    
+    cout << "====================================" << endl;
+    cout << "BIENVENIDO AL SIMULADOR DE CAJERO AUTOMATICO" << endl;
+    cout << "====================================" << endl;
+    
+    while(intentos < MAX_INTENTOS_PIN) {
+        cout << "Por favor, ingrese su PIN (4 digitos): ";
+        cin >> pin;
+        
+        // Validar que el PIN tenga 4 dígitos
+        if(pin < 1000 || pin > 9999) {
+            intentos++;
+            cout << "PIN invalido. Debe tener exactamente 4 digitos." << endl;
+            cout << "Intentos restantes: " << (MAX_INTENTOS_PIN - intentos) << endl;
+            continue;
+        }
+        
+        // Buscar PIN en la lista de PINs válidos
+        for(int i = 0; i < MAX_CLIENTES; i++) {
+            if(pin == PINES_VALIDOS[i]) {
+                return i; // Retorna el índice del cliente
+            }
+        }
+        
+        intentos++;
+        cout << "PIN incorrecto." << endl;
+        cout << "Intentos restantes: " << (MAX_INTENTOS_PIN - intentos) << endl;
+    }
+    
+    cout << "Ha excedido el numero maximo de intentos. El programa se cerrara." << endl;
+    return -1; // PIN inválido después de 3 intentos
+}
+
+// Función para mostrar menú principal
+void mostrarMenu() {
+    cout << "\n====================================" << endl;
+    cout << "MENU DE OPCIONES" << endl;
+    cout << "====================================" << endl;
+    cout << "1. Consultar saldo" << endl;
+    cout << "2. Retirar dinero" << endl;
+    cout << "3. Depositar dinero" << endl;
+    cout << "4. Ver historial de transacciones" << endl;
+    cout << "5. Salir" << endl;
+    cout << "Seleccione una opcion: ";
+}
+
+// Función para registrar transacción
+void registrarTransaccion(string tipo, double monto) {
+    int indice = contadorTransacciones[clienteActual];
+    if(indice < MAX_TRANSACCIONES) {
+        tiposTransaccion[clienteActual][indice] = tipo;
+        montosTransaccion[clienteActual][indice] = monto;
+        saldosDespues[clienteActual][indice] = saldos[clienteActual];
+        fechasTransaccion[clienteActual][indice] = obtenerFechaActual();
+        contadorTransacciones[clienteActual]++;
+    }
+}
+
+// Función para preguntar si continuar
+bool preguntarContinuar() {
+    int opcion;
+    cout << "¿Desea volver al menu principal? Digite 1 para Si o 0 para No: ";
+    cin >> opcion;
+    
+    if(opcion == 0) {
+        cout << "\nGracias por usar el Simulador de Cajero Automatico. Regrese pronto..." << endl;
+        return false;
+    }
+    return true;
+}
+
+// Opción 1: Consultar saldo
+bool consultarSaldo() {
+    cout << "\n------------------------------------" << endl;
+    cout << "CONSULTAR SALDO" << endl;
+    cout << "------------------------------------" << endl;
+    cout << fixed << setprecision(2);
+    cout << "Su saldo actual es: ₡ " << saldos[clienteActual] << endl;
+    
+    return preguntarContinuar();
+}
+
+// Opción 2: Retirar dinero
+bool retirarDinero() {
+    if(contadorTransacciones[clienteActual] >= MAX_TRANSACCIONES) {
+        cout << "Ha alcanzado el limite de transacciones permitidas (5). Regresando al Menu Principal..." << endl;
+        return true;
+    }
+    
+    double monto;
+    cout << "\n------------------------------------" << endl;
+    cout << "RETIRAR DINERO" << endl;
+    cout << "------------------------------------" << endl;
+    
+    cout << "Ingrese monto a retirar: ₡ ";
+    cin >> monto;
+    
+    // Validar monto
+    if(monto <= 0) {
+        cout << "Error: el monto ingresado no es valido. Intente nuevamente" << endl;
+        return true;
+    }
+    
+    cout << "Procesando transaccion..." << endl;
+    
+    if(monto > saldos[clienteActual]) {
+        cout << "✖ Fondos insuficientes. Su saldo es ₡ " << fixed << setprecision(2) << saldos[clienteActual] << endl;
+    } else {
+        saldos[clienteActual] -= monto;
+        registrarTransaccion("Retiro", monto);
+        cout << "✔ Retiro exitoso." << endl;
+        cout << "Saldo restante: ₡ " << fixed << setprecision(2) << saldos[clienteActual] << endl;
+    }
+    
+    return preguntarContinuar();
+}
+
+// Opción 3: Depositar dinero
+bool depositarDinero() {
+    if(contadorTransacciones[clienteActual] >= MAX_TRANSACCIONES) {
+        cout << "Ha alcanzado el limite de transacciones permitidas (5). Regresando al Menu Principal..." << endl;
+        return true;
+    }
+    
+    double monto;
+    cout << "\n------------------------------------" << endl;
+    cout << "DEPOSITAR DINERO" << endl;
+    cout << "------------------------------------" << endl;
+    
+    cout << "Ingrese monto a depositar: ₡ ";
+    cin >> monto;
+    
+    // Validar monto
+    if(monto <= 0) {
+        cout << "Error: el monto ingresado no es valido. Intente nuevamente" << endl;
+        return true;
+    }
+    
+    cout << "Procesando transaccion..." << endl;
+    
+    saldos[clienteActual] += monto;
+    registrarTransaccion("Deposito", monto);
+    cout << "✔ Deposito exitoso." << endl;
+    cout << "Saldo actual: ₡ " << fixed << setprecision(2) << saldos[clienteActual] << endl;
+    
+    return preguntarContinuar();
+}
+
+// Opción 4: Ver historial de transacciones
+bool verHistorial() {
+    cout << "\n------------------------------------" << endl;
+    cout << "HISTORIAL DE TRANSACCIONES" << endl;
+    cout << "------------------------------------" << endl;
+    
+    if(contadorTransacciones[clienteActual] == 0) {
+        cout << "No existen transacciones registradas" << endl;
+    } else {
+        cout << left << setw(12) << "Fecha" << "| " 
+             << setw(10) << "Tipo" << "| " 
+             << setw(12) << "Monto" << "| " 
+             << setw(15) << "Saldo despues" << endl;
+        cout << "------------+----------+------------+---------------" << endl;
+        
+        for(int i = 0; i < contadorTransacciones[clienteActual]; i++) {
+            cout << left << setw(12) << fechasTransaccion[clienteActual][i] << "| "
+                 << setw(10) << tiposTransaccion[clienteActual][i] << "| "
+                 << "₡ " << setw(9) << fixed << setprecision(0) << montosTransaccion[clienteActual][i] << "| "
+                 << "₡ " << fixed << setprecision(2) << saldosDespues[clienteActual][i] << endl;
+        }
+    }
+    
+    return preguntarContinuar();
+}
+
+// Función principal
+int main() {
+    inicializarDatos();
+    
+    // Validar PIN
+    clienteActual = validarPIN();
+    if(clienteActual == -1) {
+        return 0; // Salir si no se validó el PIN
+    }
+    
+    int opcion;
+    bool continuar = true;
+    
+    // Bucle principal del menú
+    while(continuar) {
+        mostrarMenu();
+        cin >> opcion;
+        
+        // Validar opción del menú
+        if(cin.fail() || opcion < 1 || opcion > 5) {
+            cin.clear();
+            cin.ignore(1000, '\n');
+            cout << "Opcion invalida, vuelva a intentarlo." << endl;
+            continue;
+        }
+        
+        switch(opcion) {
+            case 1:
+                continuar = consultarSaldo();
+                break;
+            case 2:
+                continuar = retirarDinero();
+                break;
+            case 3:
+                continuar = depositarDinero();
+                break;
+            case 4:
+                continuar = verHistorial();
+                break;
+            case 5:
+                cout << "\n------------------------------------" << endl;
+                cout << "GRACIAS POR USAR EL CAJERO" << endl;
+                cout << "------------------------------------" << endl;
+                cout << "¡Hasta pronto!" << endl;
+                cout << "(Proceso finalizado)" << endl;
+                continuar = false;
+                break;
+        }
+    }
+    
+    return 0;
+}
