@@ -1,0 +1,364 @@
+#include <iostream>
+#include <iomanip>
+#include <string>
+using namespace std;
+
+// ==========================================
+// DECLARACIÓN DE VARIABLES GLOBALES
+// ==========================================
+
+// Constantes básicas
+const int MAX_INTENTOS_PIN = 3;
+const double SALDO_INICIAL = 150000.00;
+const int MAX_TRANSACCIONES = 5;
+
+// PINs válidos para 5 clientes (usando variables separadas como sugiere el documento)
+int PIN1 = 1234;
+int PIN2 = 2345;
+int PIN3 = 3456;
+int PIN4 = 4567;
+int PIN5 = 5678;
+
+// Variables del cliente actual
+int clienteActual = -1;
+double saldoCliente = SALDO_INICIAL;
+int contadorTransacciones = 0;
+
+// Variables para historial de transacciones (máximo 5)
+string tipoTrans1 = "", tipoTrans2 = "", tipoTrans3 = "", tipoTrans4 = "", tipoTrans5 = "";
+double montoTrans1 = 0, montoTrans2 = 0, montoTrans3 = 0, montoTrans4 = 0, montoTrans5 = 0;
+double saldoDespues1 = 0, saldoDespues2 = 0, saldoDespues3 = 0, saldoDespues4 = 0, saldoDespues5 = 0;
+string fechaTrans1 = "", fechaTrans2 = "", fechaTrans3 = "", fechaTrans4 = "", fechaTrans5 = "";
+
+// ==========================================
+// FUNCIÓN PARA MOSTRAR PANTALLA PRINCIPAL
+// ==========================================
+void mostrarPantallaPrincipal() {
+    cout << "====================================" << endl;
+    cout << "BIENVENIDO AL SIMULADOR DE CAJERO AUTOMATICO" << endl;
+    cout << "====================================" << endl;
+}
+
+// ==========================================
+// FUNCIÓN PARA MOSTRAR MENÚ PRINCIPAL
+// ==========================================
+void mostrarMenu() {
+    cout << "\n====================================" << endl;
+    cout << "MENU DE OPCIONES" << endl;
+    cout << "====================================" << endl;
+    cout << "1. Consultar saldo" << endl;
+    cout << "2. Retirar dinero" << endl;
+    cout << "3. Depositar dinero" << endl;
+    cout << "4. Ver historial de transacciones" << endl;
+    cout << "5. Salir" << endl;
+    cout << "Seleccione una opcion: ";
+}
+
+// ==========================================
+// FUNCIÓN PARA OBTENER FECHA SIMPLE
+// ==========================================
+string obtenerFecha() {
+    return "17/09/2025"; // Fecha fija para simplificar
+}
+
+// ==========================================
+// FUNCIÓN PARA VALIDAR PIN
+// ==========================================
+bool validarPIN() {
+    int pin;
+    int intentos = 0;
+    
+    while (intentos < MAX_INTENTOS_PIN) {
+        cout << "Por favor, ingrese su PIN (4 digitos): ";
+        cin >> pin;
+        
+        // Verificar que tenga 4 dígitos
+        if (pin < 1000 || pin > 9999) {
+            intentos++;
+            cout << "PIN invalido. Debe tener exactamente 4 digitos." << endl;
+            cout << "Intentos restantes: " << (MAX_INTENTOS_PIN - intentos) << endl;
+            continue;
+        }
+        
+        // Verificar si el PIN es válido
+        if (pin == PIN1) {
+            clienteActual = 1;
+            return true;
+        }
+        else if (pin == PIN2) {
+            clienteActual = 2;
+            return true;
+        }
+        else if (pin == PIN3) {
+            clienteActual = 3;
+            return true;
+        }
+        else if (pin == PIN4) {
+            clienteActual = 4;
+            return true;
+        }
+        else if (pin == PIN5) {
+            clienteActual = 5;
+            return true;
+        }
+        else {
+            intentos++;
+            cout << "PIN incorrecto." << endl;
+            if (intentos < MAX_INTENTOS_PIN) {
+                cout << "Intentos restantes: " << (MAX_INTENTOS_PIN - intentos) << endl;
+            }
+        }
+    }
+    
+    cout << "Ha excedido el numero maximo de intentos. El programa se cerrara." << endl;
+    return false;
+}
+
+// ==========================================
+// FUNCIÓN PARA REGISTRAR TRANSACCIÓN
+// ==========================================
+void registrarTransaccion(string tipo, double monto) {
+    string fecha = obtenerFecha();
+    
+    if (contadorTransacciones == 0) {
+        tipoTrans1 = tipo;
+        montoTrans1 = monto;
+        saldoDespues1 = saldoCliente;
+        fechaTrans1 = fecha;
+    }
+    else if (contadorTransacciones == 1) {
+        tipoTrans2 = tipo;
+        montoTrans2 = monto;
+        saldoDespues2 = saldoCliente;
+        fechaTrans2 = fecha;
+    }
+    else if (contadorTransacciones == 2) {
+        tipoTrans3 = tipo;
+        montoTrans3 = monto;
+        saldoDespues3 = saldoCliente;
+        fechaTrans3 = fecha;
+    }
+    else if (contadorTransacciones == 3) {
+        tipoTrans4 = tipo;
+        montoTrans4 = monto;
+        saldoDespues4 = saldoCliente;
+        fechaTrans4 = fecha;
+    }
+    else if (contadorTransacciones == 4) {
+        tipoTrans5 = tipo;
+        montoTrans5 = monto;
+        saldoDespues5 = saldoCliente;
+        fechaTrans5 = fecha;
+    }
+    
+    contadorTransacciones++;
+}
+
+// ==========================================
+// FUNCIÓN PARA PREGUNTAR SI CONTINUAR
+// ==========================================
+bool preguntarContinuar() {
+    int opcion;
+    cout << "¿Desea volver al menu principal? Digite 1 para Si o 0 para No: ";
+    cin >> opcion;
+    
+    if (opcion == 0) {
+        cout << "\nGracias por usar el Simulador de Cajero Automatico. Regrese pronto..." << endl;
+        return false;
+    }
+    else if (opcion == 1) {
+        return true;
+    }
+    else {
+        cout << "Opcion invalida. Regresando al menu principal..." << endl;
+        return true;
+    }
+}
+
+// ==========================================
+// FUNCIÓN OPCIÓN 1: CONSULTAR SALDO
+// ==========================================
+bool consultarSaldo() {
+    cout << "\n------------------------------------" << endl;
+    cout << "CONSULTAR SALDO" << endl;
+    cout << "------------------------------------" << endl;
+    cout << fixed << setprecision(2);
+    cout << "Su saldo actual es: ₡ " << saldoCliente << endl;
+    
+    return preguntarContinuar();
+}
+
+// ==========================================
+// FUNCIÓN OPCIÓN 2: RETIRAR DINERO
+// ==========================================
+bool retirarDinero() {
+    // Verificar límite de transacciones
+    if (contadorTransacciones >= MAX_TRANSACCIONES) {
+        cout << "Ha alcanzado el limite de transacciones permitidas (5). Regresando al Menu Principal..." << endl;
+        return true;
+    }
+    
+    double monto;
+    cout << "\n------------------------------------" << endl;
+    cout << "RETIRAR DINERO" << endl;
+    cout << "------------------------------------" << endl;
+    
+    cout << "Ingrese monto a retirar: ₡ ";
+    cin >> monto;
+    
+    // Validar que el monto sea positivo
+    if (monto <= 0) {
+        cout << "Error: el monto ingresado no es valido. Intente nuevamente" << endl;
+        return true;
+    }
+    
+    cout << "Procesando transaccion..." << endl;
+    
+    // Verificar fondos suficientes
+    if (monto > saldoCliente) {
+        cout << "✖ Fondos insuficientes. Su saldo es ₡ " << fixed << setprecision(2) << saldoCliente << endl;
+    }
+    else {
+        saldoCliente = saldoCliente - monto; // Restar del saldo
+        registrarTransaccion("Retiro", monto);
+        cout << "✔ Retiro exitoso." << endl;
+        cout << "Saldo restante: ₡ " << fixed << setprecision(2) << saldoCliente << endl;
+    }
+    
+    return preguntarContinuar();
+}
+
+// ==========================================
+// FUNCIÓN OPCIÓN 3: DEPOSITAR DINERO
+// ==========================================
+bool depositarDinero() {
+    // Verificar límite de transacciones
+    if (contadorTransacciones >= MAX_TRANSACCIONES) {
+        cout << "Ha alcanzado el limite de transacciones permitidas (5). Regresando al Menu Principal..." << endl;
+        return true;
+    }
+    
+    double monto;
+    cout << "\n------------------------------------" << endl;
+    cout << "DEPOSITAR DINERO" << endl;
+    cout << "------------------------------------" << endl;
+    
+    cout << "Ingrese monto a depositar: ₡ ";
+    cin >> monto;
+    
+    // Validar que el monto sea positivo
+    if (monto <= 0) {
+        cout << "Error: el monto ingresado no es valido. Intente nuevamente" << endl;
+        return true;
+    }
+    
+    cout << "Procesando transaccion..." << endl;
+    
+    saldoCliente = saldoCliente + monto; // Sumar al saldo
+    registrarTransaccion("Deposito", monto);
+    cout << "✔ Deposito exitoso." << endl;
+    cout << "Saldo actual: ₡ " << fixed << setprecision(2) << saldoCliente << endl;
+    
+    return preguntarContinuar();
+}
+
+// ==========================================
+// FUNCIÓN OPCIÓN 4: VER HISTORIAL
+// ==========================================
+bool verHistorial() {
+    cout << "\n------------------------------------" << endl;
+    cout << "HISTORIAL DE TRANSACCIONES" << endl;
+    cout << "------------------------------------" << endl;
+    
+    if (contadorTransacciones == 0) {
+        cout << "No existen transacciones registradas" << endl;
+    }
+    else {
+        cout << "Fecha       | Tipo     | Monto      | Saldo despues" << endl;
+        cout << "------------+----------+------------+---------------" << endl;
+        
+        // Mostrar transacciones registradas
+        if (contadorTransacciones >= 1) {
+            cout << fechaTrans1 << " | " << tipoTrans1 << "   | ₡ " << fixed << setprecision(0) << montoTrans1 
+                 << "   | ₡ " << fixed << setprecision(2) << saldoDespues1 << endl;
+        }
+        if (contadorTransacciones >= 2) {
+            cout << fechaTrans2 << " | " << tipoTrans2 << "   | ₡ " << fixed << setprecision(0) << montoTrans2 
+                 << "   | ₡ " << fixed << setprecision(2) << saldoDespues2 << endl;
+        }
+        if (contadorTransacciones >= 3) {
+            cout << fechaTrans3 << " | " << tipoTrans3 << "   | ₡ " << fixed << setprecision(0) << montoTrans3 
+                 << "   | ₡ " << fixed << setprecision(2) << saldoDespues3 << endl;
+        }
+        if (contadorTransacciones >= 4) {
+            cout << fechaTrans4 << " | " << tipoTrans4 << "   | ₡ " << fixed << setprecision(0) << montoTrans4 
+                 << "   | ₡ " << fixed << setprecision(2) << saldoDespues4 << endl;
+        }
+        if (contadorTransacciones >= 5) {
+            cout << fechaTrans5 << " | " << tipoTrans5 << "   | ₡ " << fixed << setprecision(0) << montoTrans5 
+                 << "   | ₡ " << fixed << setprecision(2) << saldoDespues5 << endl;
+        }
+    }
+    
+    return preguntarContinuar();
+}
+
+// ==========================================
+// FUNCIÓN OPCIÓN 5: SALIR
+// ==========================================
+void salir() {
+    cout << "\n------------------------------------" << endl;
+    cout << "GRACIAS POR USAR EL CAJERO" << endl;
+    cout << "------------------------------------" << endl;
+    cout << "¡Hasta pronto!" << endl;
+    cout << "(Proceso finalizado)" << endl;
+}
+
+// ==========================================
+// FUNCIÓN PRINCIPAL - MAIN
+// ==========================================
+int main() {
+    // Mostrar pantalla de bienvenida
+    mostrarPantallaPrincipal();
+    
+    // Validar PIN del usuario
+    if (!validarPIN()) {
+        return 0; // Salir si no se valida el PIN
+    }
+    
+    // Variables para el menú
+    int opcion;
+    bool continuar = true;
+    
+    // Bucle principal del programa
+    while (continuar) {
+        mostrarMenu();
+        cin >> opcion;
+        
+        // Validar que la opción esté en el rango correcto
+        if (opcion < 1 || opcion > 5) {
+            cout << "Opcion invalida, vuelva a intentarlo." << endl;
+            continue;
+        }
+        
+        // Ejecutar la opción seleccionada
+        if (opcion == 1) {
+            continuar = consultarSaldo();
+        }
+        else if (opcion == 2) {
+            continuar = retirarDinero();
+        }
+        else if (opcion == 3) {
+            continuar = depositarDinero();
+        }
+        else if (opcion == 4) {
+            continuar = verHistorial();
+        }
+        else if (opcion == 5) {
+            salir();
+            continuar = false;
+        }
+    }
+    
+    return 0;
+}
