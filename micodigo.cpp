@@ -60,6 +60,8 @@ int main(){
                 break;
             case 4:
                 //Llamar funcion para ver historial de transacciones
+                if (historialTransacciones == 0){
+                    return 0;
                 break;
             case 5:
                 cout << endl;
