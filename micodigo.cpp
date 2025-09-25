@@ -1,80 +1,21 @@
 #include <iostream>
-
+#include <string>
 using namespace std;
 
 
 //Variables globales
 int PIN1 = 1234;
-int PIN2 = 2345; 
+int PIN2 = 2345;
 int PIN3 = 3456;
 int PIN4 = 4567;
 int PIN5 = 5678;
-int saldo_inicial = 150000; 
-int intentos_maximos = 3; 
-int transacciones = 0; 
+int saldo_inicial = 150000;
+int intentos_maximos = 3;
+int transacciones = 0;
 int transaccion1 = 0, transaccion2 = 0, transaccion3 = 0, transaccion4 = 0, transaccion5 = 0;
 string tipo1 = "", tipo2 = "", tipo3 = "", tipo4 = "", tipo5 = "";
 int saldo1 = 0, saldo2 = 0, saldo3 = 0, saldo4 = 0, saldo5 = 0;
 
-int main(){ 
-    int opcion;
-    //Llamar funcion para verificar el pin
-    if(validarPIN() == false){
-        cout << "Saliendo del sistema." << endl;
-        return 0;
-    }
-
-    do{
-        cout << endl;
-        cout << "====================================" << endl;
-        cout << "---SIMULADOR DE CAJERO AUTOMATICO---" << endl;
-        cout << "====================================" << endl;
-        cout << "----------MENU DE OPCIONES----------" << endl;
-        cout << "====================================" << endl;
-        cout << "1. Consultar saldo" << endl;
-        cout << "2. Retirar dinero" << endl;
-        cout << "3. Depositar dinero" << endl;
-        cout << "4. Ver historial de transacciones" << endl;
-        cout << "5. Salir" << endl;
-        cout << "Seleccione una opcion: ";
-        cin >> opcion;
-
-        switch(opcion){
-            case 1:
-                //Llamar funcion para consultar el saldo
-                if(consultarSaldo() == 0){
-                    return 0;
-                }
-                break;
-            case 2:
-                //Llamar funcion para retirar dinero
-                if (retirarDinero() == 0){
-                return 0;
-                }
-                break;
-            case 3:
-                //Llamar funcion para depositar dinero
-                if (depositarDinero() == 0){
-                return 0;
-                }
-                break;
-            case 4:
-                //Llamar funcion para ver historial de transacciones
-                if (historialTransacciones == 0){
-                    return 0;
-                break;
-            case 5:
-                cout << endl;
-                cout << "Gracias por usar el Simulador de Cajero Automatico. Regrese pronto..." << endl;
-                return 0;
-            default:
-                cout << "Opcion invalida, vuelva a intentarlo." << endl;
-        }
-    }while(opcion != 5);
-
-
-    return 0;
-}
 
 //Funcion para validar el pin
 bool validarPIN(){
@@ -110,6 +51,40 @@ int consultarSaldo(){
         return 0;
     }
     return 1;
+}
+
+//Registrar transacciones realizadas
+void registrarTransaccion(string tipo, int monto){
+
+    //Guardar el tipo y monto en variables de cada transaccion
+    if(transacciones == 0){
+        tipo1 = tipo;
+        transaccion1 = monto;
+        saldo1 = saldo_inicial;
+    }
+    else if(transacciones == 1){
+        tipo2 = tipo;
+        transaccion2 = monto;
+        saldo2 = saldo_inicial;
+    }
+    else if(transacciones == 2){
+        tipo3 = tipo;
+        transaccion3 = monto;
+        saldo3 = saldo_inicial;
+    }
+    else if(transacciones == 3){
+        tipo4 = tipo;
+        transaccion4 = monto;
+        saldo4 = saldo_inicial;
+    }
+    else if(transacciones == 4){
+        tipo5 = tipo;
+        transaccion5 = monto;
+        saldo5 = saldo_inicial;
+    }
+
+    // Aumentar el contador de transacciones realizadas
+    transacciones++;
 }
 
 //Funcion para retirar dinero
@@ -182,39 +157,6 @@ int depositarDinero(){
     return 1;
 }
 
-//Registrar transacciones realizadas
-int registrarTransaccion(string tipo, int monto){
-
-    //Guardar el tipo y monto en variables de cada transaccion
-    if(transacciones == 0){
-        tipo1 = tipo;
-        transaccion1 = monto;
-        saldo1 = saldo_inicial;
-    }
-    else if(transacciones == 1){
-        tipo2 = tipo;
-        transaccion2 = monto;
-        saldo2 = saldo_inicial;
-    }
-    else if(transacciones == 2){
-        tipo3 = tipo; 
-        transaccion3 = monto;
-        saldo3 = saldo_inicial;
-    }
-    else if(transacciones == 3){
-        tipo4 = tipo; 
-        transaccion4 = monto;
-        saldo4 = saldo_inicial;
-    }
-    else if(transacciones == 4){
-        tipo5 = tipo;
-        transaccion5 = monto;
-        saldo5 = saldo_inicial;
-    }
-
-    // Aumentar el contador de transacciones realizadas
-    transacciones++;
-}
 
 //Funcion para mostrar historial de transacciones
 int historialTransacciones(){
@@ -252,4 +194,66 @@ int historialTransacciones(){
         return 0;
     }
     return 1;
+}
+
+
+int main(){
+    int opcion;
+    //Llamar funcion para verificar el pin
+    if(validarPIN() == false){
+        cout << "Saliendo del sistema." << endl;
+        return 0;
+    }
+
+    do{
+        cout << endl;
+        cout << "====================================" << endl;
+        cout << "---SIMULADOR DE CAJERO AUTOMATICO---" << endl;
+        cout << "====================================" << endl;
+        cout << "----------MENU DE OPCIONES----------" << endl;
+        cout << "====================================" << endl;
+        cout << "1. Consultar saldo" << endl;
+        cout << "2. Retirar dinero" << endl;
+        cout << "3. Depositar dinero" << endl;
+        cout << "4. Ver historial de transacciones" << endl;
+        cout << "5. Salir" << endl;
+        cout << "Seleccione una opcion: ";
+        cin >> opcion;
+
+        switch(opcion){
+            case 1:
+                //Llamar funcion para consultar el saldo
+                if(consultarSaldo() == 0){
+                    return 0;
+                }
+                break;
+            case 2:
+                //Llamar funcion para retirar dinero
+                if (retirarDinero() == 0){
+                return 0;
+                }
+                break;
+            case 3:
+                //Llamar funcion para depositar dinero
+                if (depositarDinero() == 0){
+                return 0;
+                }
+                break;
+            case 4:
+                //Llamar funcion para ver historial de transacciones
+                if (historialTransacciones() == 0){
+                    return 0;
+                }
+                break;
+            case 5:
+                cout << endl;
+                cout << "Gracias por usar el Simulador de Cajero Automatico. Regrese pronto..." << endl;
+                return 0;
+            default:
+                cout << "Opcion invalida, vuelva a intentarlo." << endl;
+        }
+    }while(opcion != 5);
+
+
+    return 0;
 }
