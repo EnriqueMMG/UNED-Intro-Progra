@@ -22,6 +22,9 @@ bool validarPIN(){
     int pin;
     int intentos = 0;
     while (intentos < intentos_maximos) {
+        cout << "====================================" << endl;
+        cout << "-------------BIENVENIDO-------------" << endl;
+        cout << "====================================" << endl;
         cout << "Por favor, ingrese el numero de PIN (4 digitos): ";
         cin >> pin;
         if (pin == PIN1 || pin == PIN2 || pin == PIN3 || pin == PIN4 || pin == PIN5) {
