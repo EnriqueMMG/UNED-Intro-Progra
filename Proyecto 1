@@ -1,0 +1,427 @@
+/*
+
+Universidad Estatal a Distancia.
+
+Introduccion a la programacion.
+
+Proyecto 1
+Autor: Marcel Murillo Galan.
+
+Descripcion:
+
+Este proyecto es un simulador de cajero automatico para realizar distintas transacciones segun la opcion
+que elija el usuario. Se cumple la validacion del PIN, consulta de saldo, histotial de transacciones, retirar y depositar
+efectivo. Se utilizaron condicionales, ciclos y variables para el uso apropiado de las funciones. Los mensajes aparecen
+segun se haya completado o si hay algun error detectado en el proceso.
+
+Se utilizaron distintos medios para completar el codigo y cubrir los requerimientos solicitados.
+A continuacion se comparten las referencias utilizadas para este proyecto.
+
+Videos:
+
+Youtube - https://www.youtube.com/watch?v=sd6yrUJEF7Y
+Youtube - https://www.youtube.com/watch?v=c0ZMWN1RLt4
+I Sesion virtual UNED - https://www.youtube.com/watch?v=35B5OKZjr-I
+
+Documentacion web:
+
+https://www.w3schools.com/cpp/default.asp
+https://devdocs.io/cpp/
+
+*/
+
+
+#include <iostream>
+#include <string>
+#include <ctime>
+#include <limits>
+using namespace std;
+
+
+//Variables globales para utilizar en el sistema
+int PIN1 = 1234;
+int PIN2 = 2345;
+int PIN3 = 3456;
+int PIN4 = 4567;
+int PIN5 = 5678;
+int saldo_inicial = 150000;
+int intentos_maximos = 3;
+int transacciones = 0;
+int transaccion1 = 0, transaccion2 = 0, transaccion3 = 0, transaccion4 = 0, transaccion5 = 0;
+string tipo1 = "", tipo2 = "", tipo3 = "", tipo4 = "", tipo5 = "";
+string fecha1 = "", fecha2 = "", fecha3 = "", fecha4 = "", fecha5 = "";
+int saldo1 = 0, saldo2 = 0, saldo3 = 0, saldo4 = 0, saldo5 = 0;
+
+// Función para obtener la fecha y hora actual
+string obtenerFechaHora() {
+    time_t tiempoReal = time(0); // Dato especial para guardar el tiempo como numero. time(0) provee el tiempo actual del sistema
+    char* fechaHora = ctime(&tiempoReal); // Puntero tipo char para apuntar a la direccion de memoria y darle un formato mas legible
+    return fechaHora; // Devolver la cadena generada
+}
+
+// Función para validar entrada de números enteros
+bool validarEntrada(string mensaje) {
+
+    for(int i = 0; i < mensaje.size(); i++){
+        if(!isdigit(mensaje[i]) ){
+            return false;
+
+        }
+    }
+
+    return true;
+}
+
+//Funcion para validar el pin
+bool validarPIN(){
+    string valor;
+    int pin;
+    int intentos = 0;
+    while (intentos < intentos_maximos) {
+        cout << "====================================" << endl;
+        cout << "-------------BIENVENIDO-------------" << endl;
+        cout << "====================================" << endl;
+        cout << "Por favor, ingrese el numero de PIN (4 digitos): ";
+        getline(cin, valor);
+        cout << endl;
+
+        if (validarEntrada(valor) == false){
+            intentos++;
+            cout << "PIN incorrecto. Intentos restantes: " << (intentos_maximos - intentos) << endl;
+        } else {
+            pin = stoi(valor);  // ✅ Ahora funciona correctamente
+
+            if (pin == PIN1 || pin == PIN2 || pin == PIN3 || pin == PIN4 || pin == PIN5) {
+                return true;
+            } else {
+                intentos++;
+                cout << "PIN incorrecto. Intentos restantes: " << (intentos_maximos - intentos) << endl;
+            }
+        }
+    }
+    system("cls");
+    cout << "Ha excedido el numero maximo de intentos." << endl;
+    return false;
+}
+
+//Funcion para consultar el saldo
+int consultarSaldo(){
+    cout << endl;
+    cout << "CONSULTAR SALDO" << endl;
+    cout << "------------------------------------" << endl;
+    cout << "Su saldo actual es: " << saldo_inicial << endl;
+    cout << endl;
+
+    string opcion;
+
+    cout << "¿Desea volver al menu principal? Digite 1 para Si o 0 para No: ";
+    getline(cin, opcion);
+
+    cout << endl;
+
+    while(validarEntrada(opcion) == false){  // Llamar al metodo para validar entradas.
+        system("cls");
+        cout << "Error: Opcion invalida. Digite 1 para Si o 0 para No: ";
+        getline(cin, opcion);
+    }
+    cout << endl;
+
+    if (opcion == "0"){
+        cout << "Gracias por usar el Simulador de Cajero Automatico." << endl;
+        return 0;
+    }
+    system("cls");
+    return 1;
+}
+
+//Funcion para registrar transacciones realizadas
+void registrarTransaccion(string tipo, int monto){ // Parametros reciben los distintos valores de las transacciones realizadas
+    string fechaHoraActual = obtenerFechaHora(); // LLamar a la funcion para guardar el tiempo actual en una variable
+
+    // Guardar el tipo, el monto y la fecha en variables de cada transaccion
+    if(transacciones == 0){
+        tipo1 = tipo;
+        transaccion1 = monto;
+        saldo1 = saldo_inicial;
+        fecha1 = fechaHoraActual;
+    }
+    else if(transacciones == 1){
+        tipo2 = tipo;
+        transaccion2 = monto;
+        saldo2 = saldo_inicial;
+        fecha2 = fechaHoraActual;
+    }
+    else if(transacciones == 2){
+        tipo3 = tipo;
+        transaccion3 = monto;
+        saldo3 = saldo_inicial;
+        fecha3 = fechaHoraActual;
+    }
+    else if(transacciones == 3){
+        tipo4 = tipo;
+        transaccion4 = monto;
+        saldo4 = saldo_inicial;
+        fecha4 = fechaHoraActual;
+    }
+    else if(transacciones == 4){
+        tipo5 = tipo;
+        transaccion5 = monto;
+        saldo5 = saldo_inicial;
+        fecha5 = fechaHoraActual;
+    }
+
+
+    transacciones++; // Aumentar el contador de transacciones realizadas
+}
+
+//Funcion para retirar dinero
+int retirarDinero(){
+    if (transacciones >= 5) {  // Validar el numero de transacciones realizadas
+        cout << endl;
+        cout << "Ha alcanzado el limite de transacciones permitidas (5)." << endl;
+        return 1;
+    }
+    cout << endl;
+    cout << "RETIRAR DINERO" << endl;
+    cout << "------------------------------------" << endl;
+    int monto;
+    string valor;
+
+    cout << "Ingrese monto a retirar: ";
+    getline(cin, valor);
+
+    cout << endl;
+
+    while (validarEntrada(valor) == false){
+        system("cls");
+        cout << "Error, el monto no es valido. Intente nuevamente" << endl;;
+        getline(cin, valor);
+    }
+
+    monto = stoi(valor);  // Convertir cadena de caracteres a numero entero
+
+    // Validar que el monto sea positivo y no exceda el saldo
+    if (monto > saldo_inicial || monto <= 0) {
+        cout << "Error, el monto no es valido. Su saldo es " << saldo_inicial << endl;
+    } else {
+        saldo_inicial -= monto; // Resta al saldo inicial
+        cout << "------------------------------------" << endl;
+        cout << "Retiro exitoso." << endl;
+        cout << "Saldo actual: " << saldo_inicial << endl;
+        registrarTransaccion("Retiro", monto);
+        }
+    cout << endl;
+
+    string opcion;
+
+    cout << "¿Desea volver al menu principal? Digite 1 para Si o 0 para No: ";
+    getline(cin, opcion);
+
+    cout << endl;
+
+    while(validarEntrada(opcion) == false){  // Llamar al metodo para validar entradas.
+        system("cls");
+        cout << "Error: Opcion invalida. Digite 1 para Si o 0 para No: ";
+        getline(cin, opcion);
+    }
+
+    cout << endl;
+
+    if (opcion == "0"){
+        cout << "Gracias por usar el Simulador de Cajero Automatico." << endl;
+        return 0;
+    }
+    system("cls");
+    return 1;
+}
+
+//Funcion para depositar dinero
+int depositarDinero(){
+    if (transacciones >= 5) {  // Validar el numero de transacciones realizadas
+        cout << endl;
+        cout << "Ha alcanzado el limite de transacciones permitidas (5)." << endl;
+        return 1;
+    }
+    cout << endl;
+    cout << "DEPOSITAR DINERO" << endl;
+    cout << "------------------------------------" << endl;
+
+    int monto;
+    string valor;
+
+    cout << "Ingrese monto a depositar: ";
+    getline(cin, valor);
+
+    cout << endl;
+
+    while (validarEntrada(valor) == false){
+        system("cls");
+        cout << "Error, el monto no es valido. Intente nuevamente" << endl;;
+        getline(cin, valor);
+    }
+
+    monto = stoi(valor);  // Convertir cadena de caracteres a numero entero
+
+    // Validar que el monto sea positivo
+    if (monto <= 0) {
+        cout << "Error, el monto no es valido. Intente nuevamente" << endl;
+    } else {
+        saldo_inicial += monto; // Suma al saldo inicial
+        cout << "------------------------------------" << endl;
+        cout << "Deposito exitoso." << endl;
+        cout << "Saldo actual: " << saldo_inicial << endl;
+        registrarTransaccion("Deposito", monto);
+    }
+    cout << endl;
+
+    string opcion;
+
+    cout << "¿Desea volver al menu principal? Digite 1 para Si o 0 para No: ";
+    getline(cin, opcion);
+
+    cout << endl;
+
+    while(validarEntrada(opcion) == false){
+        system("cls");
+        cout << "Error: Opcion invalida. Digite 1 para Si o 0 para No: ";
+        getline(cin, opcion);
+    }
+    cout << endl;
+    if (opcion == "0"){
+        cout << "Gracias por usar el Simulador de Cajero Automatico." << endl;
+        return 0;
+    }
+    system("cls");
+    return 1;
+}
+
+
+//Funcion para mostrar historial de transacciones
+int historialTransacciones(){
+    cout << endl;
+    cout << "HISTORIAL DE TRANSACCIONES" << endl;
+    cout << "================================================================" << endl;
+    if (transacciones == 0) {
+        cout << "No existen transacciones registradas" << endl;
+    } else {
+        cout << "Tipo     | Monto      | Saldo despues | Fecha y Hora" << endl;
+        cout << "---------|------------|---------------|-------------------------" << endl;
+        if(transacciones >= 1){
+            cout << tipo1 << "    " << transaccion1 << "         " << saldo1 << "           " << fecha1 << endl;
+        }
+        if(transacciones >= 2){
+            cout << tipo2 << "    " << transaccion2 << "         " << saldo2 << "           " << fecha2 << endl;
+        }
+        if(transacciones >= 3){
+            cout << tipo3 << "    " << transaccion3 << "         " << saldo3 << "           " << fecha3 << endl;
+        }
+        if(transacciones >= 4){
+            cout << tipo4 << "    " << transaccion4 << "         " << saldo4 << "           " << fecha4 << endl;
+        }
+        if(transacciones == 5){
+            cout << tipo5 << "    " << transaccion5 << "         " << saldo5 << "           " << fecha5 << endl;
+        }
+    }
+    cout << endl;
+    string opcion;
+    cout << "¿Desea volver al menu principal? Digite 1 para Si o 0 para No: ";
+    getline(cin, opcion);
+
+    cout << endl;
+
+    while(validarEntrada(opcion) == false){
+        system("cls");
+        cout << "Error: Opcion invalida. Digite 1 para Si o 0 para No: ";
+        getline(cin, opcion);
+    }
+
+    cout << endl;
+
+    if (opcion == "0"){
+        cout << "Gracias por usar el Simulador de Cajero Automatico." << endl;
+        return 0;
+    }
+    system("cls");
+    return 1;
+}
+
+
+int main(){
+
+    string valor;
+    int opcion;
+
+    //Llamar funcion para verificar el pin
+    if(validarPIN() == false){
+        cout << "Saliendo del sistema." << endl;
+        return 0;
+    }
+    system("cls");
+
+    do{
+        cout << endl;
+        cout << "====================================" << endl;
+        cout << "---SIMULADOR DE CAJERO AUTOMATICO---" << endl;
+        cout << "====================================" << endl;
+        cout << "----------MENU DE OPCIONES----------" << endl;
+        cout << "====================================" << endl;
+        cout << "1. Consultar saldo" << endl;
+        cout << "2. Retirar dinero" << endl;
+        cout << "3. Depositar dinero" << endl;
+        cout << "4. Ver historial de transacciones" << endl;
+        cout << "5. Salir" << endl;
+        cout << endl;
+        cout << "Seleccione una opcion: ";
+        getline(cin, valor);
+
+        while(validarEntrada(valor) == false){
+            cout << endl;
+            cout << "Opcion invalida, vuelva a intentarlo." << endl;
+            getline(cin, valor);
+        }
+
+        opcion = stoi(valor);
+
+
+        switch(opcion){
+            case 1:
+                //Llamar funcion para consultar el saldo
+                system("cls");
+                if(consultarSaldo() == 0){
+                    return 0;
+                }
+                break;
+            case 2:
+                //Llamar funcion para retirar dinero
+                system("cls");
+                if (retirarDinero() == 0){
+                return 0;
+                }
+                break;
+            case 3:
+                //Llamar funcion para depositar dinero
+                system("cls");
+                if (depositarDinero() == 0){
+                return 0;
+                }
+                break;
+            case 4:
+                //Llamar funcion para ver historial de transacciones
+                system("cls");
+                if (historialTransacciones() == 0){
+                    return 0;
+                }
+                break;
+            case 5:
+                cout << endl;
+                cout << "Gracias por usar el Simulador de Cajero Automatico." << endl;
+                return 0;
+            default:
+                system("cls");
+                cout << "Opcion invalida, vuelva a intentarlo." << endl;
+        }
+    }while(opcion != 5);
+
+
+    return 0;
+}
