@@ -2,347 +2,734 @@
 
 
 
+// Funcion para cargar el catalogo de libros
+void cargarCatalogo(){
+    ifstream archivo("catalogo.txt"); // Abre el archivo para leerlo
 
-
-
-
-
-#include <iostream>
-#include <fstream>
-#include <vector>
-#include <iomanip>
-#include <string>
-#include <stdexcept>
-#include <ctime>
-#include <limits>
-
-using namespace std;
-
-// ============================
-// ESTRUCTURAS DE DATOS
-// ============================
-
-struct Libro {
-    string id;
-    string titulo;
-    string autor;
-    int copias;
-};
-
-struct Prestamo {
-    string idAlumno;
-    string nombreAlumno;
-    string idLibro;
-    string fecha;
-};
-
-// ============================
-// FUNCIONES AUXILIARES
-// ============================
-
-bool esNumero(const string &s) {
-    for (char c : s) {
-        if (!isdigit(c)) return false;
+    if(!archivo.is_open()){ // Verifica si el archivo se abrió correctamente
+      cout<<"No se pudo abrir el archivo. \n";
+      return;
     }
-    return true;
-}
+  try{
 
-string obtenerFechaActual() {
-    time_t t = time(nullptr);
-    tm *now = localtime(&t);
-    char buffer[11];
-    strftime(buffer, 11, "%d/%m/%Y", now);
-    return string(buffer);
-}
+    string linea;
+    while(getline(archivo, linea)){ // Lee cada línea del archivo
+      if (linea.empty()) continue;// Salta las líneas vacías
 
-void pausar() {
-    cout << "\nPresione ENTER para continuar...";
-    cin.ignore(numeric_limits<streamsize>::max(), '\n');
-}
+      stringstream ss(linea); // Ayuda a dividir la línea en partes
+      Libro libro; // Crea una estructura para almacenar la información del libro
+      string copias;
 
-// ============================
-// FUNCIONES DE ARCHIVOS
-// ============================
+      getline(ss, libro.id, '|');
+      getline(ss, libro.titulo, '|');
+      getline(ss, libro.autor, '|');
+      getline(ss, copias, '|');
+      libro.copias = stoi(copias); // Convierte la cadena a entero
 
-void cargarCatalogo(vector<Libro> &catalogo) {
-    ifstream archivo("catalogo.txt");
-    if (!archivo) return;
-    Libro l;
-    while (archivo >> l.id) {
-        archivo.ignore();
-        getline(archivo, l.titulo);
-        getline(archivo, l.autor);
-        archivo >> l.copias;
-        archivo.ignore();
-        catalogo.push_back(l);
+      catalogo.push_back(libro); // Agrega el libro al catálogo
     }
     archivo.close();
+  }catch (...){ // Captura cualquier excepción que ocurra durante la lectura del archivo
+    cout << "Error al cargar el catalogo. \n";
+  }
 }
 
-void guardarCatalogo(const vector<Libro> &catalogo) {
-    ofstream archivo("catalogo.txt");
-    for (const auto &l : catalogo) {
-        archivo << l.id << endl;
-        archivo << l.titulo << endl;
-        archivo << l.autor << endl;
-        archivo << l.copias << endl;
+// Funcion para guardar dentro del catalogo de libros
+void guardarCatalogo(){
+  ofstream archivo("catalogo.txt"); // Abre el archivo para escribirlo
+
+  if(!archivo.is_open()){
+    cout << "No se pudo abrir el archivo. \n";
+    return;
+  }
+
+  for(const auto& libro : catalogo){ // Recorre el catálogo de libros sin modificarlo
+    archivo << libro.id << "|" << libro.titulo << "|" << libro.autor << "|" << libro.copias << "\n"; // Escribe la información del libro en el archiv0
+  }
+  archivo.close(); // Cierra el archivo
+}
+
+// Funcion para cargar los prestamos
+void cargarPrestamos(){
+
+  ifstream archivo("prestamos.txt"); // Abre el archivo para leerlo
+
+  if(!archivo.is_open()){ // Verifica si el archivo se abrió correctamente
+    cout << "No se pudo abrir el archivo. \n";
+    return;
+  }
+  try{
+
+    string linea;
+    while(getline(archivo, linea)){ // Lee cada línea del archivo
+      if (linea.empty()) continue; // Salta las líneas vacías
+
+      stringstream ss(linea); // Ayuda a dividir la línea en partes
+      Prestamo prestamo; // Crea una estructura para almacenar la información del préstamo
+
+      getline(ss, prestamo.idAlumno, '|');
+      getline(ss, prestamo.nombreAlumno, '|');
+      getline(ss, prestamo.idLibro, '|');
+      getline(ss, prestamo.fecha, '|');
+
+      prestamos.push_back(prestamo); // Agrega el préstamo al vector
     }
     archivo.close();
+  }catch (... ){ // Captura cualquier excepción que ocurra durante la lectura del archivo
+    cout << "Error al cargar los prestamos. \n";
+  }
 }
 
-void cargarPrestamos(vector<Prestamo> &prestamos) {
-    ifstream archivo("prestamos.txt");
-    if (!archivo) return;
-    Prestamo p;
-    while (archivo >> p.idAlumno) {
-        archivo.ignore();
-        getline(archivo, p.nombreAlumno);
-        archivo >> p.idLibro;
-        archivo.ignore();
-        getline(archivo, p.fecha);
-        prestamos.push_back(p);
-    }
-    archivo.close();
+// Funcion para guardar los prestamos
+void guardarPrestamos(){
+  ofstream archivo("prestamos.txt"); // Abre el archivo para escribirlo
+
+  if(!archivo.is_open()){ // Verifica si el archivo se abrió correctamente
+    cout << "No se pudo abrir el archivo. \n";
+    return;
+  }
+  for(const auto& prestamo : prestamos){ // Recorre el vector de préstamos sin modificarlo
+    archivo << prestamo.idAlumno << "|" << prestamo.nombreAlumno << "|" << prestamo.idLibro << "|" << prestamo.fecha << "\n"; // Escribe la información del préstamo en el archivo
+  }
+  archivo.close(); // Cierra el archivo
 }
 
-void guardarPrestamos(const vector<Prestamo> &prestamos) {
-    ofstream archivo("prestamos.txt");
-    for (const auto &p : prestamos) {
-        archivo << p.idAlumno << endl;
-        archivo << p.nombreAlumno << endl;
-        archivo << p.idLibro << endl;
-        archivo << p.fecha << endl;
-    }
-    archivo.close();
-}
 
-// ============================
-// FUNCIONES PRINCIPALES
-// ============================
 
-void ingresarLibro(vector<Libro> &catalogo) {
-    cout << "\n------------------------------------\n";
-    cout << "    INGRESAR REGISTRO AL CATÁLOGO\n";
-    cout << "------------------------------------\n";
 
-    Libro nuevo;
+
+
+//********************************************************************
+
+//FUNCIONES DEL MENU
+
+//Opcion 1: Ingresar registro al catalogo
+void ingresarLibro() {
+
     while (true) {
-        cout << "Ingrese ID de libro (6 dígitos): ";
-        cin >> nuevo.id;
-        if (nuevo.id.length() != 6 || !esNumero(nuevo.id)) {
-            cout << "Valor inválido, inténtelo de nuevo.\n";
-            continue;
-        }
-        bool existe = false;
-        for (auto &l : catalogo)
-            if (l.id == nuevo.id) existe = true;
-        if (existe) {
-            cout << "ID ya existe.\n";
-            continue;
-        }
-        break;
-    }
-    cin.ignore();
-    cout << "Ingrese título: ";
-    getline(cin, nuevo.titulo);
-    cout << "Ingrese autor: ";
-    getline(cin, nuevo.autor);
-    do {
-        cout << "Ingrese número de copias disponibles (0-9): ";
-        string cop;
-        cin >> cop;
-        if (!esNumero(cop) || stoi(cop) < 0 || stoi(cop) > 9) {
-            cout << "Valor inválido, inténtelo de nuevo.\n";
-            continue;
-        }
-        nuevo.copias = stoi(cop);
-        break;
-    } while (true);
 
-    catalogo.push_back(nuevo);
-    guardarCatalogo(catalogo);
-    cout << "\n✔ Libro \"" << nuevo.titulo << "\" (ID: " << nuevo.id << ") registrado con éxito.\n";
+        // Verficar el ID
+        string id;
+        while (true) {
+            cout << endl;
+            cout << "Ingrese ID del libro (6 dígitos max): ";
+            getline(cin, id);
+
+            if (id.empty()) {
+                cout << "El ID no puede estar en blanco.\n";
+                continue;
+            }
+
+            if (!validarEntrada(id)) {
+                cout << endl;
+                cout << "El ID solo debe contener números.\n";
+                continue;
+            }
+
+            if (id.size() > 6) {
+                cout << endl;
+                cout << "El ID no debe exceder 6 dígitos.\n";
+                continue;
+            }
+
+            bool existe = false;
+            for (const auto& libro : catalogo) {
+                if (libro.id == id) { // Verificar si el ID ya existe
+                    existe = true;
+                    break;
+                }
+            }
+
+            if (existe) {
+                cout << endl;
+                cout << "ID ya existe.\n";
+                continue;
+            }
+
+            break; // ID válido y se sale del bucle
+        }
+
+        // Verificar el título
+        string titulo;
+        while (true) {
+            cout << "Ingrese el nombre del libro: ";
+            getline(cin, titulo);
+
+            if (titulo.empty()) {
+                cout << "El título no puede estar vacío.\n";
+                continue;
+            }
+
+            break; // Título válido y se sale del bucle
+        }
+
+        // Verificar el autor
+        string autor;
+        while (true) {
+            cout << "Ingrese el nombre del autor: ";
+            getline(cin, autor);
+
+            if (autor.empty()) {
+                cout << "El autor no puede estar vacío.\n";
+                continue;
+            }
+
+            break; // Autor válido y se sale del bucle
+        }
+
+        // Verificar el número de copias
+        string copias;
+        int numeroCopias;
+        while (true) {
+            cout << "Ingrese número de copias (0 a 9): ";
+            getline(cin, copias);
+
+            if (!validarEntrada(copias)) {
+                cout << "Solo se permiten números (0-9).\n";
+                continue;
+            }
+
+            numeroCopias = stoi(copias); // Convertir a entero
+
+            if (numeroCopias < 0 || numeroCopias > 9) {
+                cout << "Debe estar en el rango 0 a 9.\n";
+                continue;
+            }
+
+            break; // Valor válido y se sale del bucle
+        }
+
+        // Agregar el libro al catálogo
+        Libro nuevo;
+        nuevo.id = id;
+        nuevo.titulo = titulo;
+        nuevo.autor = autor;
+        nuevo.copias = numeroCopias;
+
+        catalogo.push_back(nuevo);
+        guardarCatalogo();
+
+        cout << "Libro agregado exitosamente.\n";
+
+        // Preguntar si desea regresar al menú
+        string opcion;
+        while (true) {
+            cout << "¿Desea regresar al menú? (S = Sí, N = No): ";
+            getline(cin, opcion);
+
+            if (opcion == "S" || opcion == "s") {
+                return; // Sale de la función y regresa al menú
+            }
+            else if (opcion == "N" || opcion == "n") {
+                break; // Vuelve al inicio del while(true)
+            }
+            else {
+                cout << "Opción inválida.\n";
+            }
+        }
+    }
 }
 
-void mostrarCatalogo(const vector<Libro> &catalogo) {
-    cout << "\n------------------------------------\n";
-    cout << "          CATÁLOGO DE LIBROS\n";
-    cout << "------------------------------------\n";
-    cout << left << setw(8) << "ID" << " | "
-         << setw(20) << "Título" << " | "
-         << setw(25) << "Autor" << " | "
-         << "Disponibles\n";
-    cout << string(70, '-') << "\n";
-    for (auto &l : catalogo) {
-        cout << setw(8) << l.id << " | "
-             << setw(20) << l.titulo.substr(0, 20) << " | "
-             << setw(25) << l.autor.substr(0, 25) << " | "
-             << l.copias << "\n";
+//Opcion 2: Mostrar catalogo
+void mostrarCatalogo() {
+
+
+    while (true) {
+
+       system("cls");
+
+        cout << "=========== CATALOGO DE LIBROS ===========" << endl;
+
+        if (catalogo.empty()) {
+            cout << endl;
+            cout << "No hay libros registrados en el catalogo." << endl;
+        }
+        else {
+            // Encabezados tipo tabla
+            cout << left
+                 << setw(10) << "ID"
+                 << setw(30) << "Titulo"
+                 << setw(25) << "Autor"
+                 << setw(10) << "Copias"
+                 << endl;
+
+            cout << string(75, '-') << endl;
+
+            // Mostrar cada libro
+            for (const auto& libro : catalogo) {
+                cout << left
+                     << setw(10) << libro.id
+                     << setw(30) << libro.titulo
+                     << setw(25) << libro.autor
+                     << setw(10) << libro.copias
+                     << endl;
+            }
+
+            cout << "\nTotal de libros registrados: " << catalogo.size() << endl << endl;
+        }
+        // Preguntar si desea regresar al menú
+        string opcion;
+        while (true){
+            cout << endl;
+            cout << "¿Desea regresar al menu? (S = Si, N = No): ";
+            getline(cin, opcion);
+            if (opcion == "S" || opcion == "s"){
+                return; // Sale de la función y regresa al menú
+            }
+            else if (opcion == "N" || opcion == "n"){
+              break; // Vuelve al inicio del while(true)
+            }
+            else{
+                cout << endl;
+                cout << "Opcion invalida.\n";
+            }
+        }
     }
-    cout << "\nTotal de registros: " << catalogo.size() << "\n";
-    pausar();
 }
 
-void registrarPrestamo(vector<Libro> &catalogo, vector<Prestamo> &prestamos) {
-    cout << "\n------------------------------------\n";
-    cout << "       REGISTRAR NUEVO PRÉSTAMO\n";
-    cout << "------------------------------------\n";
+//Opcion 3: Registrar nuevo prestamo
+void registrarPrestamo() {
 
-    Prestamo nuevo;
-    cout << "Ingrese ID de alumno (9 dígitos): ";
-    cin >> nuevo.idAlumno;
-    if (nuevo.idAlumno.length() != 9 || !esNumero(nuevo.idAlumno)) {
-        cout << "Valor inválido.\n";
-        return;
-    }
-    cin.ignore();
-    cout << "Ingrese nombre del alumno: ";
-    getline(cin, nuevo.nombreAlumno);
-    cout << "Ingrese ID de libro (6 dígitos): ";
-    cin >> nuevo.idLibro;
-    if (nuevo.idLibro.length() != 6 || !esNumero(nuevo.idLibro)) {
-        cout << "Valor inválido.\n";
-        return;
-    }
+    while (true) {
 
-    // Buscar libro
-    for (auto &l : catalogo) {
-        if (l.id == nuevo.idLibro) {
-            cout << "\nLibro encontrado:\n";
-            cout << "  Título      : " << l.titulo << "\n";
-            cout << "  Disponibles : " << l.copias << "\n";
-            if (l.copias <= 0) {
-                cout << "No hay copias disponibles.\n";
+        cout << "========== REGISTRAR PRESTAMO ==========" << endl << endl;
+
+        // ======== 1. ID ALUMNO ========
+        string idAlumno;
+        while (true) {
+            cout << "Ingrese ID del alumno (9 digitos): ";
+            getline(cin, idAlumno);
+
+            if (idAlumno.empty()) {
+                cout << "El ID no puede estar en blanco.\n";
+                continue;
+            }
+            if (!validarEntrada(idAlumno)) {
+                cout << "Solo se permiten numeros.\n";
+                continue;
+            }
+            if (idAlumno.size() != 9) {
+                cout << "El ID debe tener exactamente 9 digitos.\n";
+                continue;
+            }
+            break;
+        }
+
+        // ======== 2. ID DEL LIBRO ========
+        string idLibro;
+        int indiceLibro = -1;
+
+        pedirLibroDeNuevo:
+
+        while (true) {
+            cout << "Ingrese ID del libro (6 digitos): ";
+            getline(cin, idLibro);
+
+            if (idLibro.empty()) {
+                cout << "El ID no puede estar en blanco.\n";
+                continue;
+            }
+            if (!validarEntrada(idLibro)) {
+                cout << "Solo se permiten numeros.\n";
+                continue;
+            }
+            if (idLibro.size() != 6) {
+                cout << "El ID debe tener exactamente 6 digitos.\n";
+                continue;
+            }
+
+            // Buscar libro en el catálogo
+            indiceLibro = -1;
+            for (int i = 0; i < catalogo.size(); i++) {
+                if (catalogo[i].id == idLibro) {
+                    indiceLibro = i;
+                    break;
+                }
+            }
+
+            if (indiceLibro == -1) {
+                cout << "El ID de libro no existe.\n";
+                continue;
+            }
+
+            break;
+        }
+
+        // Mostrar info del libro encontrado
+        cout << "\nLibro encontrado: " << catalogo[indiceLibro].titulo << endl;
+        cout << "Copias disponibles: " << catalogo[indiceLibro].copias << endl;
+
+        // NO HAY COPIAS DISPONIBLES
+        if (catalogo[indiceLibro].copias == 0) {
+            cout << "\nNo hay copias disponibles de este libro.\n";
+            cout << "¿Desea solicitar otro libro? (S/N): ";
+            string op;
+            getline(cin, op);
+
+            if (op == "S" || op == "s") {
+                goto pedirLibroDeNuevo;   // ← reinicia sólo la parte del ID libro
+            }
+            else {
+                return;  // volver al menú
+            }
+        }
+
+        // ======== 3. NOMBRE DEL ALUMNO ========
+        string nombreAlumno;
+        while (true) {
+            cout << "\nIngrese el nombre del alumno: ";
+            getline(cin, nombreAlumno);
+
+            if (nombreAlumno.empty()) {
+                cout << "El nombre no puede estar en blanco.\n";
+                continue;
+            }
+            break;
+        }
+
+        // ======== 4. FECHA ========
+        // Generar fecha actual
+        time_t t = time(0);
+        tm* now = localtime(&t);
+
+        char fechaActual[11];
+        strftime(fechaActual, 11, "%d/%m/%Y", now);
+
+        string fechaPrestamo = fechaActual;
+
+        cout << "\nFecha sugerida del prestamo: " << fechaPrestamo << endl;
+        cout << "¿Desea modificar la fecha? (S/N): ";
+        string cambiarFecha;
+        getline(cin, cambiarFecha);
+
+        if (cambiarFecha == "S" || cambiarFecha == "s") {
+            cout << "Ingrese nueva fecha (DD/MM/YYYY): ";
+            getline(cin, fechaPrestamo);
+        }
+
+        // ======== CONFIRMAR PRESTAMO ========
+        cout << "\nSe encontraron copias disponibles." << endl;
+        cout << "¿Desea confirmar el prestamo? (S/N): ";
+        string confirmar;
+        getline(cin, confirmar);
+
+        if (confirmar == "N" || confirmar == "n") {
+            cout << "\nPrestamo cancelado.\n";
+        }
+        else {
+            // Registrar y actualizar
+            Prestamo nuevo;
+            nuevo.idAlumno = idAlumno;
+            nuevo.nombreAlumno = nombreAlumno;
+            nuevo.idLibro = idLibro;
+            nuevo.fecha = fechaPrestamo;
+
+            prestamos.push_back(nuevo);
+
+            catalogo[indiceLibro].copias--;
+
+            guardarCatalogo(); // actualiza el archivo
+            cout << "\nPrestamo registrado correctamente.\n";
+        }
+
+        // ======== SALIR O REPETIR ========
+        cout << "\n¿Desea volver al menu principal? (S/N): ";
+        string opcion;
+        getline(cin, opcion);
+
+        if (opcion == "S" || opcion == "s") {
+            return;
+        }
+
+    }
+}
+
+//Opcion 4: Devolver libro
+void devolverLibro() {
+
+    while (true) {
+
+        cout << "=========== DEVOLVER LIBRO ===========" << endl << endl;
+
+        // ======== 1. ID ALUMNO =========
+        string idAlumno;
+
+        pedirAlumnoDeNuevo:
+
+        while (true) {
+            cout << "Ingrese ID del alumno (9 digitos): ";
+            getline(cin, idAlumno);
+
+            if (idAlumno.empty()) {
+                cout << "El campo no puede estar vacio.\n";
+                continue;
+            }
+            if (!validarEntrada(idAlumno)) {
+                cout << "Solo se permiten numeros.\n";
+                continue;
+            }
+            if (idAlumno.size() != 9) {
+                cout << "Debe contener exactamente 9 digitos.\n";
+                continue;
+            }
+            break;
+        }
+
+        // ======== 2. Buscar prestamos del alumno ========
+        vector<int> indicesPrestamos;
+
+        for (int i = 0; i < prestamos.size(); i++) {
+            if (prestamos[i].idAlumno == idAlumno) {
+                indicesPrestamos.push_back(i);
+            }
+        }
+
+        // No existe alumno ni préstamos
+        if (indicesPrestamos.empty()) {
+            cout << "\nAlumno no registrado o no tiene prestamos.\n";
+            cout << "¿Desea consultar otro alumno? (S/N): ";
+            string op;
+            getline(cin, op);
+
+            if (op == "S" || op == "s") {
+
+                goto pedirAlumnoDeNuevo;
+            }
+            else {
+
                 return;
             }
-            cout << "¿Confirmar préstamo? (S/N): ";
-            char conf; cin >> conf;
-            if (toupper(conf) == 'S') {
-                l.copias--;
-                nuevo.fecha = obtenerFechaActual();
-                prestamos.push_back(nuevo);
-                guardarCatalogo(catalogo);
-                guardarPrestamos(prestamos);
-                cout << "\n✔ Préstamo registrado con éxito.\n";
+        }
+
+        // Mostrar los libros prestados por ese alumno
+        cout << "\nLibros prestados por el alumno:\n";
+        cout << left << setw(10) << "ID Libro"
+             << setw(30) << "Titulo"
+             << setw(20) << "Fecha" << endl;
+        cout << string(60, '-') << endl;
+
+        for (int idx : indicesPrestamos) {
+            string idLibroPrestado = prestamos[idx].idLibro;
+
+            // Buscar título del libro
+            string titulo = "";
+            for (const auto& l : catalogo) {
+                if (l.id == idLibroPrestado) {
+                    titulo = l.titulo;
+                    break;
+                }
             }
+
+            cout << left << setw(10) << idLibroPrestado
+                 << setw(30) << titulo
+                 << setw(20) << prestamos[idx].fecha << endl;
+        }
+
+        // ======== 3. Pedir ID del libro a devolver ========
+        string idLibro;
+        int indicePrestamo = -1;
+
+        while (true) {
+            cout << "\nIngrese el ID del libro a devolver (6 digitos): ";
+            getline(cin, idLibro);
+
+            if (idLibro.empty()) {
+                cout << "No puede estar vacio.\n";
+                continue;
+            }
+            if (!validarEntrada(idLibro)) {
+                cout << "Solo se permiten numeros.\n";
+                continue;
+            }
+            if (idLibro.size() != 6) {
+                cout << "Debe contener 6 digitos.\n";
+                continue;
+            }
+
+            // Buscar préstamo exacto
+            for (int idx : indicesPrestamos) {
+                if (prestamos[idx].idLibro == idLibro) {
+                    indicePrestamo = idx;
+                    break;
+                }
+            }
+
+            if (indicePrestamo == -1) {
+                cout << "Dato incorrecto. Ese libro no esta prestado a este alumno.\n";
+                continue;
+            }
+
+            break;
+        }
+
+        // ======== MOSTRAR DATOS DEL PRESTAMO ========
+        cout << "\nDatos del prestamo encontrado:\n";
+        cout << "Alumno: " << prestamos[indicePrestamo].nombreAlumno << endl;
+        cout << "ID Libro: " << prestamos[indicePrestamo].idLibro << endl;
+        cout << "Fecha: " << prestamos[indicePrestamo].fecha << endl;
+
+        // ======== CONFIRMAR DEVOLUCION ========
+        cout << "\n¿Desea confirmar la devolucion? (S/N): ";
+        string confirmar;
+        getline(cin, confirmar);
+
+        if (confirmar == "S" || confirmar == "s") {
+
+            // 1. Aumentar copias en catálogo
+            for (auto& libro : catalogo) {
+                if (libro.id == idLibro) {
+                    libro.copias++;
+                    break;
+                }
+            }
+
+            // 2. Remover el prestamo
+            prestamos.erase(prestamos.begin() + indicePrestamo);
+
+            // 3. Guardar catálogo
+            guardarCatalogo();
+
+            cout << "\nDevolucion registrada correctamente.\n";
+        }
+        else {
+            cout << "\nDevolucion cancelada.\n";
+        }
+
+        // ======== SALIR O REPETIR ========
+        cout << "\n¿Desea volver al menu principal? (S/N): ";
+        string opcion;
+        getline(cin, opcion);
+
+        if (opcion == "S" || opcion == "s") {
             return;
         }
+
+
     }
-    cout << "Libro no encontrado.\n";
 }
 
-void devolverLibro(vector<Libro> &catalogo, vector<Prestamo> &prestamos) {
-    cout << "\n------------------------------------\n";
-    cout << "         DEVOLVER LIBRO\n";
-    cout << "------------------------------------\n";
-    string idA, idL;
-    cout << "Ingrese ID de alumno (9 dígitos): ";
-    cin >> idA;
-    cout << "Ingrese ID de libro (6 dígitos): ";
-    cin >> idL;
+//Opcion 5: Ver historial de prestamos
+void verHistorialPrestamos() {
 
-    for (size_t i = 0; i < prestamos.size(); i++) {
-        if (prestamos[i].idAlumno == idA && prestamos[i].idLibro == idL) {
-            cout << "\nPréstamo encontrado:\n";
-            cout << "  Alumno   : " << prestamos[i].nombreAlumno << "\n";
-            cout << "  Libro ID : " << prestamos[i].idLibro << "\n";
-            cout << "  Fecha    : " << prestamos[i].fecha << "\n";
-            cout << "¿Confirmar devolución? (S/N): ";
-            char conf; cin >> conf;
-            if (toupper(conf) == 'S') {
-                // Aumentar copias
-                for (auto &l : catalogo)
-                    if (l.id == idL)
-                        l.copias++;
-                prestamos.erase(prestamos.begin() + i);
-                guardarCatalogo(catalogo);
-                guardarPrestamos(prestamos);
-                cout << "✔ Libro devuelto con éxito.\n";
+    while (true) {
+
+
+        cout << "=========== HISTORIAL DE PRESTAMOS ===========" << endl << endl;
+
+        if (prestamos.empty()) {
+            cout << "No hay prestamos registrados." << endl << endl;
+        }
+        else {
+
+            // Encabezado tipo tabla
+            cout << left
+                 << setw(12) << "ID Alumno"
+                 << setw(25) << "Nombre"
+                 << setw(12) << "ID Libro"
+                 << setw(12) << "Fecha"
+                 << endl;
+
+            cout << string(70, '-') << endl;
+
+            // Mostrar cada préstamo
+            for (const auto& p : prestamos) {
+                cout << left
+                     << setw(12) << p.idAlumno
+                     << setw(25) << p.nombreAlumno
+                     << setw(12) << p.idLibro
+                     << setw(12) << p.fecha
+                     << endl;
             }
-            return;
+
+            cout << "\nTotal de prestamos realizados: " << prestamos.size() << endl << endl;
+        }
+
+        // Preguntar si desea volver al menú
+        string opcion;
+        cout << "¿Desea volver al menú principal? (S/N): ";
+        getline(cin, opcion);
+
+        if (opcion == "S" || opcion == "s") {
+
+            return;  // salir de la función → regresa al menú
+        }
+        else if (opcion == "N" || opcion == "n") {
+
+            continue; // vuelve a mostrar el historial
+        }
+        else {
+            cout << "Opción inválida.";
         }
     }
-    cout << "Préstamo no encontrado.\n";
 }
 
-void verHistorial(const vector<Prestamo> &prestamos) {
-    cout << "\n------------------------------------\n";
-    cout << "      HISTORIAL DE PRÉSTAMOS\n";
-    cout << "------------------------------------\n";
-    cout << left << setw(12) << "Alumno ID" << " | "
-         << setw(15) << "Nombre" << " | "
-         << setw(8) << "Libro ID" << " | "
-         << "Fecha\n";
-    cout << string(55, '-') << "\n";
-    for (auto &p : prestamos) {
-        cout << setw(12) << p.idAlumno << " | "
-             << setw(15) << p.nombreAlumno.substr(0, 15) << " | "
-             << setw(8) << p.idLibro << " | "
-             << p.fecha << "\n";
-    }
-    cout << "\nTotal de préstamos registrados: " << prestamos.size() << "\n";
-    pausar();
-}
 
-// ============================
-// MENÚ PRINCIPAL
-// ============================
 
-void mostrarMenu() {
+
+
+//********************************************************************
+int main(){
+
+  cargarCatalogo();
+  cargarPrestamos();
+
+  int opcion;
+  do{
+
+    system("cls");
+
+
+
     cout << "\n====================================\n";
-    cout << "      SISTEMA DE BIBLIOTECA C++\n";
+    cout << "     SISTEMA DE BIBLIOTECA\n";
     cout << "====================================\n";
-    cout << "1. Ingresar registro al catálogo\n";
-    cout << "2. Mostrar catálogo\n";
-    cout << "3. Registrar nuevo préstamo\n";
+    cout << "1. Ingresar registro al catalogo\n";
+    cout << "2. Mostrar catalogo\n";
+    cout << "3. Registrar nuevo prestamo\n";
     cout << "4. Devolver libro\n";
-    cout << "5. Ver historial de préstamos\n";
+    cout << "5. Ver historial de prestamos\n";
     cout << "6. Salir\n";
-    cout << "Ingrese una opción: ";
-}
+    cout << "\nIngrese una opcion: ";
+    cin >> opcion;
 
-// ============================
-// FUNCIÓN MAIN
-// ============================
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');
 
-int main() {
-    vector<Libro> catalogo;
-    vector<Prestamo> prestamos;
 
-    try {
-        cargarCatalogo(catalogo);
-        cargarPrestamos(prestamos);
-    } catch (...) {
-        cerr << "Error al cargar archivos.\n";
+    switch(opcion){
+      case 1:
+        system("cls");
+        ingresarLibro();
+        break;
+      case 2:
+        system("cls");
+        mostrarCatalogo();
+        break;
+      case 3:
+        system("cls");
+        registrarPrestamo();
+        break;
+      case 4:
+        system("cls");
+        devolverLibro();
+        break;
+      case 5:
+        system("cls");
+        verHistorialPrestamos();
+        break;
+      case 6:
+        system("cls");
+        cout << "Saliendo del programa...\n";
+        break;
+      default:
+        system("cls");
+        cout << "Opción inválida. Intente de nuevo.\n";
     }
 
-    int opcion;
-    do {
-        mostrarMenu();
-        cin >> opcion;
-        if (cin.fail()) {
-            cin.clear();
-            cin.ignore(numeric_limits<streamsize>::max(), '\n');
-            cout << "Valor inválido, inténtelo de nuevo.\n";
-            continue;
-        }
+  }while(opcion != 6);
 
-        switch (opcion) {
-            case 1: ingresarLibro(catalogo); break;
-            case 2: mostrarCatalogo(catalogo); break;
-            case 3: registrarPrestamo(catalogo, prestamos); break;
-            case 4: devolverLibro(catalogo, prestamos); break;
-            case 5: verHistorial(prestamos); break;
-            case 6:
-                cout << "\n------------------------------------\n";
-                cout << "Gracias por usar el Sistema de Biblioteca C++.\n";
-                cout << "¡Hasta pronto!\n";
-                cout << "------------------------------------\n";
-                break;
-            default:
-                cout << "Valor inválido, inténtelo de nuevo.\n";
-        }
-    } while (opcion != 6);
 
-    return 0;
+
+
+  return 0;
 }
+
